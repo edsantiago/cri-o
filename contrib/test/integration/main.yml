@@ -2,57 +2,27 @@
   remote_user: root
   vars_files:
     - "{{ playbook_dir }}/vars.yml"
-  tags:
-    - setup
   tasks:
-    - name: set up the system
+    - name: Set up the system
       include: system.yml
+      tags:
+        - setup
 
-    - name: install Golang tools
-      include: golang.yml
+    - name: Build CRI-O
+      include: build.yml
+      tags:
+        - always
 
-    - name: clone build and install bats
-      include: "build/bats.yml"
+    - block:
+        - name: Install CRI-O
+          include: install.yml
 
-    - name: clone build and install cri-tools
-      include: "build/cri-tools.yml"
+        - name: Smoke test Installed CRI-O
+          include: smoke.yml
 
-    - name: clone build and install kubernetes
-      include: "build/kubernetes.yml"
+        - name: Execute Kubernetes e2e tests
+          include: e2e.yml
 
-    - name: clone build and install runc
-      include: "build/runc.yml"
-
-    - name: clone build and install networking plugins
-      include: "build/plugins.yml"
-
-- hosts: all
-  remote_user: root
-  vars_files:
-    - "{{ playbook_dir }}/vars.yml"
-  tags:
-    - integration
-    - e2e
-  tasks:
-    - name: clone build and install cri-o
-      include: "build/cri-o.yml"
-
-- hosts: all
-  remote_user: root
-  vars_files:
-    - "{{ playbook_dir }}/vars.yml"
-  tags:
-    - integration
-  tasks:
-    - name: run cri-o integration tests
-      include: test.yml
-
-- hosts: all
-  remote_user: root
-  vars_files:
-    - "{{ playbook_dir }}/vars.yml"
-  tags:
-    - e2e
-  tasks:
-    - name: run k8s e2e tests
-      include: e2e.yml
+      # Just fudging past origin-ci use of tags
+      tags:
+        - e2e

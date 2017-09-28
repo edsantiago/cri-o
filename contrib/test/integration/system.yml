@@ -5,56 +5,11 @@
     name: "{{ item }}"
     state: present
   with_items:
-    - container-selinux
-    - curl
-    - device-mapper-devel
-    - expect
-    - findutils
-    - gcc
-    - git
-    - glib2-devel
-    - glibc-devel
-    - glibc-static
-    - gpgme-devel
-    - hostname
-    - iproute
-    - iptables
-    - krb5-workstation
-    - libassuan-devel
-    - libffi-devel
-    - libgpg-error-devel
-    - libguestfs-tools
-    - libseccomp-devel
-    - libvirt-client
-    - libvirt-python
-    - libxml2-devel
-    - libxslt-devel
-    - make
-    - mlocate
-    - nfs-utils
-    - nmap-ncat
-    - oci-register-machine
-    - oci-systemd-hook
-    - oci-umount
-    - openssl
-    - openssl-devel
-    - ostree-devel
-    - pkgconfig
-    - python
-    - python2-boto
-    - python2-crypto
-    - python-devel
-    - python-virtualenv
-    - PyYAML
     - redhat-rpm-config
-    - rpcbind
-    - rsync
-    - sed
-    - skopeo-containers
-    - socat
-    - tar
-    - wget
+    - rpm-build
+    - yum-utils
   async: 600
+  async: '{{ 20 * 60 }}'
   poll: 10
 
 - name: Add Btrfs for Fedora
@@ -71,29 +26,6 @@
     state: latest
   async: 600
   poll: 10
-
-- name: Setup swap to prevent kernel firing off the OOM killer
-  shell: |
-    truncate -s 8G /root/swap && \
-    export SWAPDEV=$(losetup --show -f /root/swap | head -1) && \
-    mkswap $SWAPDEV && \
-    swapon $SWAPDEV && \
-    swapon --show
-
-- name: ensure directories exist as needed
-  file:
-    path: "{{ item }}"
-    state: directory
-  with_items:
-    - /opt/cni/bin
-    - /etc/cni/net.d
-
-- name: set sysctl vm.overcommit_memory=1 for CentOS
-  sysctl:
-    name: vm.overcommit_memory
-    state: present
-    value: 1
-  when: ansible_distribution == 'CentOS'
 
 - name: inject hostname into /etc/hosts
   lineinfile:
