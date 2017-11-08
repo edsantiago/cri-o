@@ -2,14 +2,9 @@
 
 - name: Make sure we have all required packages
   package:
-    name: "{{ item }}"
+    name: "redhat-rpm-config, rpm-build, yum-utils, iptables"
     state: present
-  with_items:
-    - redhat-rpm-config
-    - rpm-build
-    - yum-utils
-  async: 600
-  async: '{{ 20 * 60 }}'
+  async: '{{ 10 * 60 }}'
   poll: 10
 
 - name: Add Btrfs for Fedora
